@@ -1,10 +1,11 @@
 'use client';
 
 import { Box, createTheme, CssBaseline, Skeleton, ThemeProvider, Typography } from "@mui/material";
-import useSWR from "swr";
 import VideoDisplay from "./components/VideoDisplay";
-
-const fetcher = (input: RequestInfo | URL, init?: RequestInit) => fetch(input, init).then(res => res.json())
+import ProductCard from "./components/ProductCard";
+import { CheckoutInfo } from "./models/CheckoutInfo";
+import BuyProductModal from "./components/BuyProductModal";
+import { useEffect, useState } from "react";
 
 const darkTheme = createTheme({
   palette: {
@@ -13,23 +14,44 @@ const darkTheme = createTheme({
 });
 
 export default function Home() {
-  const { data, isLoading } = useSWR(
-    `https://api-candidate.ogruposix.com/checkout/95BD9233-8FDC-48AD-B4C5-E5BAF7578C15`,
-    url => fetcher(
-      url,
-      {
+  const [isLoading, setIsLoading] = useState(true);
+  const [data, setData] = useState<CheckoutInfo|undefined>();
+
+  useEffect(() => {
+    setIsLoading(true);
+
+    const fetchData = async () => {
+      const res = await fetch("https://api-candidate.ogruposix.com/checkout/95BD9233-8FDC-48AD-B4C5-E5BAF7578C15", {
         headers: {
           'user-token': '2A50C22E-7954-4C73-9CF9-F6D298C047A7',
           'Content-Type': 'application/json'
         },
         cache: "force-cache"
-      }
-    )
-  );
+      });
+
+      setData(await res.json());
+      setIsLoading(false);
+    }
+
+    fetchData();
+  }, []);
+
+  const [buyProductId, setBuyProductId] = useState(-1);
+  const [showBuyModal, setShowBuyModal] = useState(false);
+
+  const onBuyPressed = (productId: number) => {
+    setBuyProductId(productId);
+    setShowBuyModal(true);
+  }
   
   return (
     <ThemeProvider theme={darkTheme}>
       <CssBaseline />
+      <BuyProductModal
+        isOpen={showBuyModal}
+        setIsOpen={setShowBuyModal}
+        productId={buyProductId}
+      />
       <Box
         sx={{
           width: "100vw",
@@ -39,14 +61,7 @@ export default function Home() {
           gap: 2,
           alignItems: "center",
           paddingTop: 4,
-          paddingBottom: 4,
-          background: "url('https://media.istockphoto.com/id/1256373514/pt/foto/3d-illustration-of-colon-cancer-colon-tumor.jpg?s=612x612&w=0&k=20&c=egS4syfX-brHCkOLwGWQdTJseHKncAqAdieQVTsNqLo=')",
-          backgroundRepeat: "no-repeat",
-          backgroundSize: "cover",
-          backgroundPosition: "50% 0",
-          "&::after": {
-            backdropFilter: "blur(5px)"
-          }
+          paddingBottom: 4
         }}
       >
         <Box
@@ -87,7 +102,7 @@ export default function Home() {
                 paddingRight={1}
                 width={'100%'}
             >
-              {data?.object?.[0]?.video_headline}
+              {data?.object[0]?.video_headline}
             </Typography>
             )
           }
@@ -115,15 +130,80 @@ export default function Home() {
                 paddingRight={1}
                 width={'100%'}
               >
-                {data?.object?.[0]?.video_sub_headline}
+                {data?.object[0]?.video_sub_headline}
               </Typography>
             )
           }
 
           <VideoDisplay
-            src={data?.object?.[0]?.video_url}
+            src={data?.object[0]?.video_url}
             isLoading={isLoading}
           ></VideoDisplay>
+
+          <Box
+            sx={{
+              paddingTop: 4,
+              paddingBottom: 4,
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              flexDirection: {
+                xs: 'column',
+                sm: 'row'
+              },
+              gap: 2,
+              width: '100%'
+            }}
+          >
+            {
+              isLoading ? (
+                <Skeleton width={400} height={400} variant="rounded"></Skeleton>
+              ) : (
+                <ProductCard
+                  bestChoice={data!.object[0].products[0].best_choice}
+                  discount={data!.object[0].products[0].discount}
+                  freight={data!.object[0].products[0].freight}
+                  imageUrl={data!.object[0].products[0].image_url}
+                  name={data!.object[0].products[0].name}
+                  price={data!.object[0].products[0].price}
+                  productId={data!.object[0].products[0].product_id}
+                  onBuy={onBuyPressed}
+                />
+              )
+            }
+            {
+              isLoading ? (
+                <Skeleton width={400} height={400} variant="rounded"></Skeleton>
+              ) : (
+                <ProductCard
+                  bestChoice={data!.object[0].products[1].best_choice}
+                  discount={data!.object[0].products[1].discount}
+                  freight={data!.object[0].products[1].freight}
+                  imageUrl={data!.object[0].products[1].image_url}
+                  name={data!.object[0].products[1].name}
+                  price={data!.object[0].products[1].price}
+                  productId={data!.object[0].products[1].product_id}
+                  onBuy={onBuyPressed}
+                />
+              )
+            }
+            {
+              isLoading ? (
+                <Skeleton width={400} height={400} variant="rounded"></Skeleton>
+              ) : (
+                <ProductCard
+                  bestChoice={data!.object[0].products[2].best_choice}
+                  discount={data!.object[0].products[2].discount}
+                  freight={data!.object[0].products[2].freight}
+                  imageUrl={data!.object[0].products[2].image_url}
+                  name={data!.object[0].products[2].name}
+                  price={data!.object[0].products[2].price}
+                  productId={data!.object[0].products[2].product_id}
+                  onBuy={onBuyPressed}
+                />
+              )
+            }
+          </Box>
         </Box>
       </Box>
     </ThemeProvider>

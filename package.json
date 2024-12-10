@@ -12,11 +12,14 @@
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
     "@fontsource/roboto": "^5.1.0",
+    "@hookform/resolvers": "^3.9.1",
     "@mui/material": "^6.1.10",
     "next": "15.0.4",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "swr": "^2.2.5"
+    "react-hook-form": "^7.54.0",
+    "react-input-mask-next": "^3.0.0-alpha.12",
+    "zod": "^3.24.0"
   },
   "devDependencies": {
     "@types/node": "^20",
